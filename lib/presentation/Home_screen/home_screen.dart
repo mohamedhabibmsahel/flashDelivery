@@ -1,17 +1,24 @@
 import 'package:flash_delivery_app/presentation/Home_screen/widgets/restaurantSection_widget.dart';
+import 'package:flash_delivery_app/widgets/custom_icon_circle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../Lists_for_test/pirceoption.dart';
+import '../../widgets/Custom_circular_image_view.dart';
 import '../../widgets/app_bar/appbar_title.dart';
-import '../../widgets/app_bar/custom_icon_circle.dart';
 import '../../widgets/custom_filter_chip.dart';
 import '../../widgets/custom_grey_line.dart';
 import '../../widgets/custom_radio_bottom_sheet.dart';
+import '../../widgets/custom_recipe_card.dart';
 import '../../widgets/custom_search_view.dart';
 import 'bloc/HomeController.dart';
 
+class HomeScreen extends StatefulWidget {
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-class HomeScreen extends StatelessWidget {
+class _HomeScreenState extends State<HomeScreen> {
   final HomeController _homeController = Get.put(HomeController());
 
   @override
@@ -38,6 +45,7 @@ class HomeScreen extends StatelessWidget {
                 },
               ),
             ),
+
             SizedBox(
               height: 100.0,
               child: ListView.builder(
@@ -45,16 +53,47 @@ class HomeScreen extends StatelessWidget {
                 itemCount: _homeController.imageInfo.length,
                 itemBuilder: (context, index) {
                   final info = _homeController.imageInfo[index];
+                  bool isSelected = index  == _homeController.selectedItemIndex.value;
+
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: CircularImageWidget(
-                      imageUrl: info['url'] ?? '',
-                      title: info['title'] ?? '',
+                    child: Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: isSelected ? _homeController.parseColor(info['Color'] ?? '').withOpacity(0.5) : Colors.transparent,
+                            shape: BoxShape.circle,
+                          ),
+                          child: CustomCircularImageView(
+                            height: 50,
+                            fit: BoxFit.fill,
+                            imagePath: info['url'],
+                              onTap: () {
+                                print('Item tapped: $index');
+                                print(_homeController.selectedItemIndex);
+                                setState(() {
+                                  if (index == _homeController.selectedItemIndex.value) {
+                                    // If the tapped index is the same as the selected index, deselect it
+                                    _homeController.setSelectedItemIndex(-1);
+                                  } else {
+                                    // Otherwise, select the tapped index
+                                    _homeController.setSelectedItemIndex(index);
+                                  }                                });
+                                print(_homeController.selectedItemIndex);
+                              },
+                          ),
+                        ),
+                        Text(
+                          info['title'] ?? '',
+                          style: const TextStyle(fontSize: 12.0),
+                        ),
+                      ],
                     ),
                   );
                 },
               ),
             ),
+
             Padding(
               padding: const EdgeInsets.only(left: 4.0, right: 4.0),
               child: SingleChildScrollView(
@@ -65,19 +104,31 @@ class HomeScreen extends StatelessWidget {
                     CustomFilterChip(
                       label: const Text('Delivery time'),
                       content: Text("Delivery Time"),
-                      selected: _homeController.isFilterDeliveryTimeSelected.value,
+                      selected:
+                          _homeController.isFilterDeliveryTimeSelected.value,
                       onSelected: _homeController.handleFilterDeliveryTime,
                     ),
-                    const SizedBox(width: 10,),
+                    const SizedBox(
+                      width: 10,
+                    ),
                     CustomFilterChip(
                       label: const Text('Delivery fee'),
-                      content: Text("Delivery fee"),
-                      selected: _homeController.isFilterDeliveryFeeSelected.value,
+                      content: CustomSliderBottomSheet(
+                        title: 'Delivery fee',
+                        initialValue: 5.0,
+                        divisions: _homeController.divisions,
+                        button1Label: 'Apply',
+                        button2Label: 'Reset',
+                      ),
+                      selected:
+                          _homeController.isFilterDeliveryFeeSelected.value,
                       onSelected: (bool selected) {
                         // Handle selection
                       },
                     ),
-                    const SizedBox(width: 10,),
+                    const SizedBox(
+                      width: 10,
+                    ),
                     CustomFilterChip(
                       label: const Text('Sort by'),
                       content: CustomRadioBottomSheet(
@@ -99,12 +150,58 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(
+              height: 8.0,
+            ),
             const GreyLine(),
-            RestaurantSection(title: "Stores near you", restaurantInfo: _homeController.restaurantInfo),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Best Stores",
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {},
+                    child: Icon(
+                      Icons.arrow_forward_ios,
+                      size: 30.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            RecipeCard(
+              title: 'My recipe',
+              rating: '4.9',
+              cookTime: '30 min',
+              thumbnailUrl:
+                  'https://lh3.googleusercontent.com/ei5eF1LRFkkcekhjdR_8XgOqgdjpomf-rda_vvh7jIauCgLlEWORINSKMRR6I6iTcxxZL9riJwFqKMvK0ixS0xwnRHGMY4I5Zw=s360',
+            ),
+            RecipeCard(
+              title: 'My recipe',
+              rating: '4.9',
+              cookTime: '30 min',
+              thumbnailUrl:
+                  'https://lh3.googleusercontent.com/ei5eF1LRFkkcekhjdR_8XgOqgdjpomf-rda_vvh7jIauCgLlEWORINSKMRR6I6iTcxxZL9riJwFqKMvK0ixS0xwnRHGMY4I5Zw=s360',
+            ),
             const GreyLine(),
-            RestaurantSection(title: "Featured Restaurants", restaurantInfo: _homeController.restaurantInfo),
+            RestaurantSection(
+                title: "Stores near you",
+                restaurantInfo: _homeController.restaurantInfo),
             const GreyLine(),
-            RestaurantSection(title: "top 10 Restaurants", restaurantInfo: _homeController.restaurantInfo),
+            RestaurantSection(
+                title: "Featured Restaurants",
+                restaurantInfo: _homeController.restaurantInfo),
+            const GreyLine(),
+            RestaurantSection(
+                title: "top 10 Restaurants",
+                restaurantInfo: _homeController.restaurantInfo),
             const GreyLine(),
             // Add more RestaurantSection widgets as needed
           ],
