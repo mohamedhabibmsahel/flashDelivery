@@ -1,4 +1,5 @@
 
+import 'package:flash_delivery_app/presentation/Restaurant_screen/restaurant_screen.dart';
 import 'package:flash_delivery_app/widgets/navigation_menu/navigation_menu.dart';
 import 'package:flutter/material.dart';
 
@@ -30,7 +31,8 @@ class MyApp extends StatelessWidget {
       //home: const LoginScreen(),
       //home: const HomeScreen(),
       //home:  ViewAllScreen(restaurantInfo:restaurantInfo ,),
-      home: const NavigationMenu(),
+      //home: const NavigationMenu(),
+      home: const RestaurantScreen(),
     );
   }
 }
